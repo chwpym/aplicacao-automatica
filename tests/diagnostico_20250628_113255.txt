@@ -1,0 +1,23 @@
+
+RELATÓRIO DE DIAGNÓSTICO - 2025-06-28 11:32:49
+===============================================
+
+Sistema: Sistema de Catálogo Automotivo
+Versão: 1.0
+Data: 2025-06-28 11:32:49
+
+VERIFICAÇÕES:
+Python: ✅ PASSOU
+Dependências: ✅ PASSOU
+Arquivos: ✅ PASSOU
+JSON: ✅ PASSOU
+Provedores: ✅ PASSOU
+Aplicativo: ❌ FALHOU
+Permissões: ✅ PASSOU
+
+RESULTADO FINAL: ❌ PROBLEMAS ENCONTRADOS
+
+RECOMENDAÇÕES:
+- Verificar problemas identificados acima
+- Executar instalar.bat para reinstalar dependências
+- Verificar permissões de arquivo

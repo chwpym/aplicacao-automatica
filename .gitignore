@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.log
+
+# Ambientes virtuais
+venv/
+.env/
+.venv/
+
+# IDEs e editores
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Dados locais e arquivos grandes
+catalogos_pdf/
+bkp/
+pdf/
+*.pdf
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.swp 
