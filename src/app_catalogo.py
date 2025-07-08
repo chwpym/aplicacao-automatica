@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import tkinter as tk
 from tkinter import scrolledtext, messagebox, ttk, filedialog
 import requests
@@ -10,6 +13,54 @@ import re
 from bs4 import BeautifulSoup
 import subprocess
 import pdfplumber
+from providers.rest import RESTProvider
+from providers.rest_parsers import (
+    parse_wega_json, parse_generic_json,
+    parse_nakata_html, parse_generic_html,
+    parse_viemar_json, parse_schadek_json
+)
+
+def buscar_viemar_playwright(codigo):
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        messagebox.showerror("Dependência Ausente", "Playwright não está instalado. Instale com: pip install playwright")
+        return []
+    campos = [
+        "linha_produto", "veiculo", "ano", "posicao", "detalhes",
+        "referencia_cruzada", "referencia", "imagem", "informacoes", "onde_comprar"
+    ]
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)
+        page = browser.new_page()
+        page.goto("https://catalogo.viemar.com.br/")
+        messagebox.showinfo("Viemar", "Digite o código, clique na lupa e aguarde os resultados.\n\nQuando a tabela aparecer, volte ao app e clique em OK para extrair os dados.")
+        linhas = page.query_selector_all('table tbody tr')
+        lista_dicts = []
+        for linha in linhas:
+            colunas = linha.query_selector_all('td')
+            dados = [col.inner_text().strip() for col in colunas]
+            lista_dicts.append(dict(zip(campos, dados)))
+        browser.close()
+    # Adapta para o formato padrão do app
+    vehicles = []
+    for item in lista_dicts:
+        vehicles.append({
+            'brand': item.get('veiculo', '').replace('\n', ' '),
+            'name': item.get('linha_produto', ''),
+            'model': item.get('linha_produto', ''),
+            'engineName': '',
+            'engineConfiguration': '',
+            'startYear': item.get('ano', ''),
+            'endYear': item.get('ano', ''),
+            'note': item.get('referencia_cruzada', ''),
+            'only': '',
+            'restriction': '',
+            'position': item.get('posicao', '').replace('\n', ' '),
+            'side': '',
+            'steering': ''
+        })
+    return vehicles
 
 # --- Configuração do arquivo de siglas ---
 SIGLAS_FILE = "siglas.json"
@@ -196,32 +247,39 @@ def buscar_provedor_generico(id_peca, provedor_config):
             return vehicles
             
         elif tipo == 'rest':
-            # NOVO: Suporte REST-JSON (ex: Wega)
-            formatted_url = url.format(id=id_peca)
-            response = requests.get(formatted_url, headers=final_headers)
-            response.raise_for_status()
-            content_type = response.headers.get("Content-Type", "")
-            # Se for JSON, trata como REST-JSON
-            if "application/json" in content_type:
-                # Detecta se é Wega pelo nome ou pela estrutura
-                if 'wega' in provedor_config.get('nome', '').lower() or 'wega' in provedor_config.get('url', '').lower():
-                    return parse_wega_json(response.json())
-                # Outros provedores REST-JSON podem ser tratados aqui
-                # Se não reconhecido, retorna lista vazia
+            rest = RESTProvider({
+                'url': url,
+                'headers': final_headers,
+                'query': provedor_config.get('query', ''),
+                'nome': provedor_config.get('nome', '')
+            })
+            try:
+                response = rest.buscar(id_peca)
+            except Exception as e:
+                messagebox.showerror("Erro de Conexão", f"Erro ao acessar a API do provedor: {e}")
                 return []
+            # --- Parsing da resposta REST ---
+            # Se for JSON (ex: Wega, Viemar)
+            if isinstance(response, dict):
+                if 'viemar' in provedor_config.get('nome', '').lower() or 'viemar' in provedor_config.get('url', '').lower():
+                    return parse_viemar_json(response)
+                if 'wega' in provedor_config.get('nome', '').lower() or 'wega' in provedor_config.get('url', '').lower():
+                    return parse_wega_json(response)
+                else:
+                    return parse_generic_json(response)
+            # Se for HTML (ex: Nakata ou outros)
             else:
-                # Mantém o parsing HTML para outros provedores REST
                 try:
                     from bs4 import BeautifulSoup
                 except ImportError:
                     messagebox.showerror("Dependência Ausente", "BeautifulSoup4 é necessário para provedores REST. Instale com: pip install beautifulsoup4")
                     return []
-                soup = BeautifulSoup(response.content, 'html.parser')
+                soup = BeautifulSoup(response, 'html.parser')
                 provedor_nome = provedor_config.get('nome', '').lower()
                 if 'nakata' in provedor_nome:
                     return parse_nakata_html(soup)
                 else:
-                    return parse_generic_rest_html(soup)
+                    return parse_generic_html(soup)
         # NOVO: Suporte para PDF Local
         elif tipo == 'pdf_local':
             pasta = provedor_config.get('pasta', 'catalogos_pdf')
@@ -1445,7 +1503,18 @@ class Application(ttk.Frame):
         self.provedor_combo = ttk.Combobox(frame_provedor, textvariable=self.provedor_var, state="readonly")
         self.provedor_combo.pack(side="left", expand=True, fill="x", padx=5)
         self.update_provedor_combo()
+
+        # Criação do checkbox da Schadek ANTES de chamar on_provedor_change
+        self.schadek_use_products_var = tk.BooleanVar(value=True)
+        self.schadek_checkbox = ttk.Checkbutton(
+            frame_provedor, text="Buscar Produto + Aplicações (Schadek)",
+            variable=self.schadek_use_products_var
+        )
+        self.schadek_checkbox.pack(side="left", padx=5)
+        self.schadek_checkbox.pack_forget()
+
         self.provedor_combo.bind("<<ComboboxSelected>>", self.on_provedor_change)
+        self.on_provedor_change()
 
         # NOVO: Listbox para seleção de PDFs (só aparece para PDF Local)
         self.frame_pdf_list = ttk.LabelFrame(frame_provedor, text="PDFs disponíveis para busca", padding=(8, 8))
@@ -1460,7 +1529,6 @@ class Application(ttk.Frame):
         self.listbox_pdfs.config(yscrollcommand=scrollbar.set)
         self.frame_pdf_list.pack(padx=10, pady=5, fill="x")
         self.frame_pdf_list.pack_forget()  # Esconde por padrão
-        self.on_provedor_change()
 
         # Botões principais para ações rápidas
         frame_quick = ttk.Frame(self)
@@ -1540,16 +1608,22 @@ class Application(ttk.Frame):
             if p['nome'] == provedor_nome:
                 provedor = p
                 break
+        if provedor_nome.lower() == "schadek":
+            self.schadek_checkbox.pack(side="left", padx=5)
+        else:
+            self.schadek_checkbox.pack_forget()
         if provedor and provedor.get('tipo') == 'pdf_local':
             pasta = provedor.get('pasta', 'catalogos_pdf')
             self.listbox_pdfs.delete(0, tk.END)
             if not os.path.exists(pasta):
-                self.frame_pdf_list.pack_forget()
+                if hasattr(self, 'frame_pdf_list') and self.frame_pdf_list is not None:
+                    self.frame_pdf_list.pack_forget()   
                 messagebox.showwarning("Pasta não encontrada", f"A pasta '{pasta}' não existe. Crie a pasta e coloque os PDFs nela.")
                 return
             pdfs = [f for f in os.listdir(pasta) if f.lower().endswith('.pdf')]
             if not pdfs:
-                self.frame_pdf_list.pack_forget()
+                if hasattr(self, 'frame_pdf_list') and self.frame_pdf_list is not None:
+                    self.frame_pdf_list.pack_forget()   
                 messagebox.showinfo("Nenhum PDF encontrado", f"Nenhum arquivo PDF foi encontrado na pasta '{pasta}'.")
                 return
             for pdf in pdfs:
@@ -1557,7 +1631,8 @@ class Application(ttk.Frame):
             self.frame_pdf_list.pack(padx=10, pady=8, fill="x")
             self.frame_pdf_list.lift()
         else:
-            self.frame_pdf_list.pack_forget()
+            if hasattr(self, 'frame_pdf_list') and self.frame_pdf_list is not None:
+                    self.frame_pdf_list.pack_forget()   
 
     def perform_search(self):
         id_peca = self.id_entry.get().strip()
@@ -1625,11 +1700,27 @@ class Application(ttk.Frame):
                     'steering': ''
                 })
             raw_vehicles = vehicles
+        elif provedor.get('tipo') == 'viemar':
+            raw_vehicles = buscar_viemar_playwright(id_peca)
+        elif provedor.get('tipo') == 'schadek':
+            import requests
+            if hasattr(self, 'schadek_use_products_var') and self.schadek_use_products_var.get():
+                url = provedor.get('url_products', '').replace('{codigo}', id_peca)
+            else:
+                url = provedor.get('url_applications', '').replace('{codigo}', id_peca)
+            try:
+                resp = requests.get(url, timeout=10)
+                resp.raise_for_status()
+                data = resp.json()
+                raw_vehicles = parse_schadek_json(data)
+            except Exception as e:
+                messagebox.showerror("Erro Schadek", f"Erro ao buscar na Schadek: {e}")
+                return
         else:
             raw_vehicles = buscar_provedor_generico(id_peca, provedor)
-        if not raw_vehicles:
-            messagebox.showinfo("Sem Aplicações", "Nenhuma aplicação encontrada ou erro na busca.")
-            return
+            if not raw_vehicles:
+                messagebox.showinfo("Sem Aplicações", "Nenhuma aplicação encontrada ou erro na busca.")
+                return
 
         # Limpa a Treeview antes de uma nova busca
         for item in self.tree_results.get_children():
@@ -1720,8 +1811,10 @@ class Application(ttk.Frame):
                                                key=lambda x: tuple(x.get(k, '') for k in self.field_vars.keys()))
         
         # Filtra apenas os campos selecionados para a tabela
-        selected_fields = [key for key in self.field_vars.keys() if self.field_vars[key].get()]
-        display_names = [self.available_fields[key] for key in selected_fields]
+        field_vars = self.field_vars if self.field_vars is not None else {}
+        available_fields = self.available_fields if self.available_fields is not None else {}
+        selected_fields = [key for key in field_vars.keys() if field_vars[key].get()]
+        display_names = [available_fields[key] for key in selected_fields]
         
         self.tree_results.config(columns=selected_fields)
         for col_key, display_name in zip(selected_fields, display_names):
@@ -1729,7 +1822,7 @@ class Application(ttk.Frame):
             self.tree_results.column(col_key, width=120, anchor='w')
         for col_key in selected_fields:
             max_width = 0
-            header_width = len(self.available_fields[col_key]) * 8
+            header_width = len(available_fields[col_key]) * 8
             max_width = max(max_width, header_width)
             for app_data in applications_for_table_sorted:
                 content_width = len(str(app_data.get(col_key, ''))) * 8

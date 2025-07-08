@@ -83,8 +83,7 @@
         "nome": "Schadek",
         "tipo": "schadek",
         "ativo": true,
-        "url_products": "https://schadek.com.br/api/domain/products/code/{codigo}",
-        "url_applications": "https://schadek.com.br/api/domain/application/{codigo}"
+        "url": "https://schadek.com.br/api/domain/products/code/{codigo}"
     },
     "whaler": {
         "nome": "Whaler",

@@ -74,27 +74,26 @@
         },
         "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
     },
-    "viemar": {
+     "viemar": {
         "nome": "Viemar",
         "tipo": "viemar",
         "ativo": true
     },
     "schadek": {
-        "nome": "Schadek",
-        "tipo": "schadek",
-        "ativo": true,
-        "url_products": "https://schadek.com.br/api/domain/products/code/{codigo}",
-        "url_applications": "https://schadek.com.br/api/domain/application/{codigo}"
+    "nome": "Schadek",
+    "tipo": "schadek",
+    "ativo": true,
+    "url": "https://schadek.com.br/api/domain/application/{codigo}"
+},
+"whaler": {
+    "nome": "Whaler",
+    "url": "https://bff.catalogofraga.com.br/gateway/graphql",
+    "tipo": "graphql",
+    "ativo": true,
+    "headers": {
+        "origin": "https://catalogowahler.com.br",
+        "referer": "https://catalogowahler.com.br/"
     },
-    "whaler": {
-        "nome": "Whaler",
-        "url": "https://bff.catalogofraga.com.br/gateway/graphql",
-        "tipo": "graphql",
-        "ativo": true,
-        "headers": {
-            "origin": "https://catalogowahler.com.br",
-            "referer": "https://catalogowahler.com.br/"
-        },
-        "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
-    }
+    "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
+}
 }

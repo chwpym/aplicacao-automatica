@@ -1,0 +1,1 @@
+# Funções de configuração serão movidas para cá 
