@@ -149,7 +149,7 @@ def parse_nakata_html(soup):
                 table = t
                 break
         if not table:
-            return vehicles
+            return parse_nakata_html_legacy(soup)
         tbody = table.find("tbody")
         if not tbody:
             return vehicles
@@ -164,26 +164,100 @@ def parse_nakata_html(soup):
             lado = cells[4].get_text(strip=True)
             direcao = cells[5].get_text(strip=True)
             observacao = cells[6].get_text(strip=True)
-            vehicles.append(
-                {
-                    "brand": brand,
-                    "name": model,
-                    "model": model,
-                    "engineName": "",
-                    "engineConfiguration": "",
-                    "startYear": None,  # Adapte se necessário
-                    "endYear": None,
-                    "note": observacao,
-                    "only": "",
-                    "restriction": "",
-                    "position": posicao,
-                    "side": lado,
-                    "steering": direcao,
-                }
-            )
-    except Exception:
-        pass
+            start_year, end_year = None, None
+            ano_match = re.match(r"(\d{2})/(\d{2})\s*-\s*(\d{2})/(\d{2})", ano_raw)
+            if ano_match:
+                _, start_yy, _, end_yy = ano_match.groups()
+                start_year = int("20" + start_yy) if int(start_yy) < 50 else int("19" + start_yy)
+                end_year = int("20" + end_yy) if int(end_yy) < 50 else int("19" + end_yy)
+            else:
+                anos = re.findall(r"\d{2}/(\d{2})", ano_raw)
+                if anos:
+                    start_year = end_year = int("20" + anos[0]) if int(anos[0]) < 50 else int("19" + anos[0])
+            combined_notes = []
+            if observacao and observacao != "-":
+                combined_notes.append(observacao)
+            if posicao and posicao != "-":
+                combined_notes.append(f"Posição: {posicao}")
+            if lado and lado != "-":
+                combined_notes.append(f"Lado: {lado}")
+            if direcao and direcao != "-":
+                combined_notes.append(f"Direção: {direcao}")
+            vehicles.append({
+                'brand': brand,
+                'name': model,
+                'model': model,
+                'engineName': '',
+                'engineConfiguration': '',
+                'startYear': start_year,
+                'endYear': end_year,
+                'note': '; '.join(combined_notes),
+                'only': '',
+                'restriction': '',
+                'position': posicao,
+                'side': lado,
+                'steering': direcao
+            })
+    except Exception as e:
+        print(f"Erro ao fazer parsing do HTML da Nakata: {e}")
+        return parse_nakata_html_legacy(soup)
     return vehicles
+
+
+def parse_nakata_html_legacy(soup):
+    vehicles = []
+    try:
+        tables = soup.find_all('table')
+        for table in tables:
+            rows = table.find_all('tr')
+            for row in rows:
+                cells = row.find_all(['td', 'th'])
+                if len(cells) < 2:
+                    continue
+                cell_texts = [cell.get_text(strip=True) for cell in cells]
+                row_text = ' '.join(cell_texts)
+                vehicle_info = extract_vehicle_info_from_text(row_text)
+                if vehicle_info:
+                    vehicles.append(vehicle_info)
+        if not vehicles:
+            divs = soup.find_all('div', class_=lambda x: x and any(word in x.lower() for word in ['aplicacao', 'veiculo', 'modelo', 'marca']))
+            for div in divs:
+                text = div.get_text(strip=True)
+                vehicle_info = extract_vehicle_info_from_text(text)
+                if vehicle_info:
+                    vehicles.append(vehicle_info)
+        if not vehicles:
+            text = soup.get_text()
+            vehicle_info = extract_vehicle_info_from_text(text)
+            if vehicle_info:
+                vehicles.append(vehicle_info)
+    except Exception as e:
+        print(f"Erro ao fazer parsing legado do HTML da Nakata: {e}")
+    return vehicles
+
+
+def extract_vehicle_info_from_text(text):
+    marca_patterns = [
+        r'\b(VW|VOLKSWAGEN)\b',
+        r'\b(FIAT)\b',
+        r'\b(GM|CHEVROLET)\b',
+        r'\b(FORD)\b',
+        r'\b(HONDA)\b',
+        r'\b(TOYOTA)\b',
+        r'\b(HYUNDAI)\b',
+        r'\b(NISSAN)\b',
+        r'\b(RENAULT)\b',
+        r'\b(PEUGEOT)\b',
+        r'\b(CITROEN)\b',
+        r'\b(BMW)\b',
+        r'\b(MERCEDES|MERCEDES-BENZ)\b',
+        r'\b(AUDI)\b',
+        r'\b(VOLVO)\b',
+        r'\b(SCANIA)\b',
+        r'\b(IVECO)\b',
+    ]
+    # ... restante da função ...
+    return None  # Placeholder
 
 
 # Exemplo de parser genérico para HTML

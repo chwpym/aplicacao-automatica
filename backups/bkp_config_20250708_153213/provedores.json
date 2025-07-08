@@ -96,16 +96,5 @@
             "referer": "https://catalogowahler.com.br/"
         },
         "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
-    },
-    "bastos_juntas": {
-        "nome": "Bastos Juntas",
-        "url": "https://bff.catalogofraga.com.br/gateway/graphql",
-        "tipo": "graphql",
-        "ativo": true,
-        "headers": {
-            "origin": "https://bastosjuntas.catalogofraga.com.br",
-            "referer": "https://bastosjuntas.catalogofraga.com.br/"
-        },
-        "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
     }
 }

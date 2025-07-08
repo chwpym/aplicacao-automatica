@@ -13,12 +13,27 @@ import re
 from bs4 import BeautifulSoup
 import subprocess
 import pdfplumber
-from providers.rest import RESTProvider
+from providers.rest import RESTProvider, buscar_provedor_generico
 from providers.rest_parsers import (
-    parse_wega_json, parse_generic_json,
-    parse_nakata_html, parse_generic_html,
-    parse_viemar_json, parse_schadek_json
+    parse_wega_json,
+    parse_ano_inicio,
+    parse_ano_fim,
+    parse_nakata_html,
+    parse_nakata_html_legacy,
+    extract_vehicle_info_from_text,
+    parse_viemar_json,
+    parse_generic_json,
+    parse_generic_html,
+    parse_schadek_json
 )
+from utils.config import (
+    load_siglas, save_siglas,
+    load_palavras_remover, save_palavras_remover,
+    load_provedores, save_provedores,
+    merge_year_ranges_overall
+)
+from utils.limpeza import remover_palavras_avancado
+from interface.layout_system import center_window
 
 def buscar_viemar_playwright(codigo):
     try:
