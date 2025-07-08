@@ -34,6 +34,8 @@ from utils.config import (
 )
 from utils.limpeza import remover_palavras_avancado
 from interface.layout_system import center_window
+from providers.pdf import PDFProvider
+from providers.graphql import AuthomixGraphQLProvider
 
 def buscar_viemar_playwright(codigo):
     try:
@@ -235,32 +237,9 @@ def buscar_provedor_generico(id_peca, provedor_config):
         final_headers = {**default_headers, **headers}
         
         if tipo == 'graphql':
-            # Configuração específica para GraphQL
-            final_headers["Content-Type"] = "application/json"
-            
-            variables = {
-                "id": id_peca,
-                "market": "BRA"
-            }
-            
-            payload = json.dumps({
-                "query": query,
-                "variables": variables
-            })
-            
-            response = requests.post(url, headers=final_headers, data=payload)
-            response.raise_for_status()
-            data = response.json()
-            
-            if 'errors' in data:
-                messagebox.showerror("Erro GraphQL", f"Erro na resposta GraphQL: {data['errors']}")
-                return []
-            
-            product_data = data.get('data', {}).get('product', {})
-            vehicles = product_data.get('vehicles', [])
-            
-            return vehicles
-            
+            # Utiliza o provedor modular AuthomixGraphQLProvider
+            graphql_provider = AuthomixGraphQLProvider()
+            return graphql_provider.buscar(id_peca)
         elif tipo == 'rest':
             rest = RESTProvider({
                 'url': url,
@@ -298,7 +277,8 @@ def buscar_provedor_generico(id_peca, provedor_config):
         # NOVO: Suporte para PDF Local
         elif tipo == 'pdf_local':
             pasta = provedor_config.get('pasta', 'catalogos_pdf')
-            resultados_pdf = buscar_codigo_em_pdfs(pasta, id_peca)
+            pdf_provider = PDFProvider()
+            resultados_pdf = pdf_provider.buscar(id_peca, pasta)
             # Adapta para o formato esperado pela interface
             vehicles = []
             for r in resultados_pdf:
@@ -1675,28 +1655,8 @@ class Application(ttk.Frame):
                 messagebox.showwarning("Seleção de PDF", "Selecione pelo menos um PDF para buscar.")
                 return
             pdfs_escolhidos = [self.listbox_pdfs.get(i) for i in selecionados]
-            def buscar_codigo_em_pdfs_especificos(pasta, codigo_peca, pdfs):
-                import pdfplumber
-                resultados = []
-                for arquivo in pdfs:
-                    caminho_pdf = os.path.join(pasta, arquivo)
-                    try:
-                        with pdfplumber.open(caminho_pdf) as pdf:
-                            for i, page in enumerate(pdf.pages):
-                                text = page.extract_text()
-                                if not text:
-                                    continue
-                                for linha in text.split('\n'):
-                                    if codigo_peca.upper() in linha.upper():
-                                        resultados.append({
-                                            'arquivo': arquivo,
-                                            'pagina': i+1,
-                                            'linha': linha.strip()
-                                        })
-                    except Exception as e:
-                        print(f"Erro ao ler {arquivo}: {e}")
-                return resultados
-            resultados_pdf = buscar_codigo_em_pdfs_especificos(pasta, id_peca, pdfs_escolhidos)
+            pdf_provider = PDFProvider()
+            resultados_pdf = pdf_provider.buscar_em_pdfs_especificos(id_peca, pdfs_escolhidos, pasta)
             vehicles = []
             for r in resultados_pdf:
                 vehicles.append({

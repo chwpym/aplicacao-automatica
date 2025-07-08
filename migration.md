@@ -4,10 +4,16 @@ Este documento serve para acompanhar, passo a passo, a migração e refatoraçã
 
 ## Checklist de Migração
 
+- [x] **0. Estrutura de Pastas e Arquivos**
+    - [x] Criar pastas `providers/`, `interface/`, `utils/` com `__init__.py`
+    - [x] Criar arquivos-base: `base.py`, `rest.py`, `rest_parsers.py`, `main_window.py`, `layout_system.py`, `config.py`, `limpeza.py`, `backup.py`
+    - [x] Adicionar docstrings explicativas nos esqueletos
 - [ ] **1. Modularização dos Provedores**
     - [x] Migrar parsers REST para `providers/rest_parsers.py`
     - [x] Migrar lógica de busca dos provedores REST para `providers/rest.py`
-    - [ ] Migrar provedores de outros tipos (PDF, GraphQL, etc.) para seus módulos
+    - [x] Migrar provedor PDF para `providers/pdf.py` (classe PDFProvider)
+    - [x] Migrar provedor GraphQL/Authomix para `providers/graphql.py` (classe AuthomixGraphQLProvider)
+    - [x] Adaptar sistema principal para usar provedores modulares
 
 - [x] **2. Modularização dos Utilitários**
     - [x] Migrar funções auxiliares (backup, limpeza, configs) para `utils/`
@@ -18,8 +24,8 @@ Este documento serve para acompanhar, passo a passo, a migração e refatoraçã
     - [ ] Separar janela principal em `interface/main_window.py`
 
 - [ ] **4. Refatoração para Orientação a Objetos**
-    - [ ] Implementar classes base (ex: `BaseProvider`)
-    - [ ] Refatorar provedores para herdar das bases
+    - [x] Implementar classes base (ex: `BaseProvider`)
+    - [x] Refatorar provedores para herdar das bases (PDF, REST, GraphQL)
     - [ ] Refatorar interface para usar classes/componentes
 
 - [ ] **5. Limpeza e Remoção de Código Antigo**
@@ -43,7 +49,10 @@ Este documento serve para acompanhar, passo a passo, a migração e refatoraçã
 
 ## Histórico de Progresso
 
+- [x] Estrutura de pastas e arquivos-base criada e documentada com docstrings (sistema pronto para modularização detalhada)
 - [x] Parsers REST migrados para `providers/rest_parsers.py`
 - [x] Lógica de busca dos provedores REST migrada para `providers/rest.py` (sistema testado e funcionando)
 - [x] Funções utilitárias migradas para `utils/` e imports ajustados (sistema testado e funcionando)
+- [x] Provedor PDF migrado para `providers/pdf.py` (classe PDFProvider) e sistema principal adaptado
+- [x] Provedor GraphQL/Authomix migrado para `providers/graphql.py` (classe AuthomixGraphQLProvider) e sistema principal adaptado
 - [ ] (Preencha aqui cada etapa concluída com data e observações) 
