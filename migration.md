@@ -20,14 +20,15 @@ Este documento serve para acompanhar, passo a passo, a migração e refatoraçã
     - [x] Migrar funções auxiliares (backup, limpeza, configs) para `utils/`
     - [x] Ajustar imports para usar utilitários
 
-- [ ] **3. Modularização da Interface**
-    - [ ] Separar widgets/componentes auxiliares em `interface/`
-    - [ ] Separar janela principal em `interface/main_window.py`
+- [x] **3. Modularização da Interface**
+    - [x] Separar widgets/componentes auxiliares em `interface/` (ex: SearchBar, ResultsTable)
+    - [x] Separar janela principal em `interface/main_window.py`
+    - [x] Integrar interface modular à busca real: seleção dinâmica de provedor, busca conectada ao backend, exibição de resultados reais.
 
 - [ ] **4. Refatoração para Orientação a Objetos**
     - [x] Implementar classes base (ex: `BaseProvider`)
     - [x] Refatorar provedores para herdar das bases (PDF, REST, GraphQL)
-    - [ ] Refatorar interface para usar classes/componentes
+    - [x] Refatorar interface para usar classes/componentes
 
 - [ ] **5. Limpeza e Remoção de Código Antigo**
     - [ ] Remover código antigo do arquivo principal após validação
@@ -57,6 +58,11 @@ Este documento serve para acompanhar, passo a passo, a migração e refatoraçã
 - [x] Provedor PDF migrado para `providers/pdf.py` (classe PDFProvider) e sistema principal adaptado
 - [x] Provedor GraphQL/Authomix migrado para `providers/graphql.py` (classe AuthomixGraphQLProvider) e sistema principal adaptado
 - [x] **[2024-07-08] Generalização dos provedores GraphQL:** Criado `GenericGraphQLProvider` em `providers/generic_graphql.py`, integração dinâmica com cadastro/interface/JSON, todos os provedores GraphQL funcionando sem duplicação de código, retrocompatibilidade garantida.
+- [x] **[2024-07-08] Modularização da interface concluída:**
+    - Componentes SearchBar e ResultsTable criados e integrados.
+    - Seleção dinâmica de provedor implementada.
+    - Busca real conectada ao backend modularizado.
+    - Interface pronta para evoluir com novas funções.
 
 ---
 
@@ -66,3 +72,8 @@ Este documento serve para acompanhar, passo a passo, a migração e refatoraçã
     - Separar widgets/componentes auxiliares em `interface/`
     - Separar janela principal em `interface/main_window.py`
     - Refatorar interface para usar classes/componentes (orientação a objetos) 
+
+---
+
+## Melhorias Futuras Sugeridas
+- Implementar busca em múltiplos provedores simultaneamente (feature sugerida e aprovada para pós-migração). 
