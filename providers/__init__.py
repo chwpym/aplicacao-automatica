@@ -1,1 +1,1 @@
- 
+from .generic_graphql import GenericGraphQLProvider 

@@ -36,6 +36,7 @@ from utils.limpeza import remover_palavras_avancado
 from interface.layout_system import center_window
 from providers.pdf import PDFProvider
 from providers.graphql import AuthomixGraphQLProvider
+from providers import GenericGraphQLProvider
 
 def buscar_viemar_playwright(codigo):
     try:
@@ -237,8 +238,12 @@ def buscar_provedor_generico(id_peca, provedor_config):
         final_headers = {**default_headers, **headers}
         
         if tipo == 'graphql':
-            # Utiliza o provedor modular AuthomixGraphQLProvider
-            graphql_provider = AuthomixGraphQLProvider()
+            graphql_provider = GenericGraphQLProvider(
+                nome=provedor_config.get('nome', ''),
+                url=url,
+                query=query,
+                headers=headers
+            )
             return graphql_provider.buscar(id_peca)
         elif tipo == 'rest':
             rest = RESTProvider({
