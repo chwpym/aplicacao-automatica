@@ -1,4 +1,4 @@
-# Catálogo Automotivo Manus
+# Catálogo Automotivo 
 
 Sistema desktop em Python para consulta de catálogos automotivos, integrando múltiplos provedores de dados (REST, GraphQL, SOAP e PDFs locais), com interface gráfica Tkinter.
 
@@ -47,12 +47,42 @@ Sistema desktop em Python para consulta de catálogos automotivos, integrando m�
 ```
 aplicacao-automatica/
 │
-├── app.py                # Arquivo principal da aplicação
-├── providers/            # Módulos dos provedores (REST, SOAP, GraphQL, PDF)
-├── config/               # Arquivos de configuração e backups
-├── assets/               # Imagens e recursos visuais
-├── requirements.txt      # Dependências do projeto
-└── README.md             # Este arquivo
+├── src/
+│   └── app_catalogo.py         # Arquivo principal da aplicação
+│
+├── providers/                  # Módulos dos provedores (REST, GraphQL, PDF, etc.)
+│   ├── rest.py
+│   ├── graphql.py
+│   ├── generic_provider.py
+│   ├── ...
+│
+├── interface/                  # Componentes da interface gráfica (Tkinter)
+│   ├── main_window.py
+│   ├── results_table.py
+│   ├── search_bar.py
+│   └── layout_system.py
+│
+├── utils/                      # Utilitários e funções auxiliares
+│   ├── config.py
+│   ├── backup.py
+│   └── limpeza.py
+│
+├── backups/                    # Backups automáticos dos arquivos de configuração
+│
+├── docs/                       # Documentação e scripts auxiliares
+│
+├── tests/                      # Testes automatizados
+│   ├── test_nakata.py
+│   ├── test_providers.py
+│   └── ...
+│
+├── catalogos_pdf/              # Catálogos PDF locais para busca
+│
+├── palavras_remover.json       # Lista de palavras/frases para limpeza
+├── provedores.json             # Configuração dos provedores
+├── siglas.json                 # Mapa de siglas
+├── requirements.txt            # Dependências do projeto
+└── README.md                   # Este arquivo
 ```
 
 ## Contribuição
