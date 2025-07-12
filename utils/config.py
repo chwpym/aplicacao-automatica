@@ -2,6 +2,7 @@
 
 import os
 import json
+import re
 from tkinter import messagebox
 
 # --- Utilitários de configuração e dados ---
@@ -72,3 +73,27 @@ def merge_year_ranges_overall(ranges):
     final_min_start = overall_min_start if overall_min_start != 0 else None
     final_max_end = overall_max_end if overall_max_end != 9999 else None
     return final_min_start, final_max_end 
+
+    # --- NOVO: Funções auxiliares para parsing de ano ---
+def parse_ano_inicio(ano_str):
+    # Exemplo: "97 -- 99" ou "2007 -->"
+    if not ano_str:
+        return None
+    anos = re.findall(r'\d{2,4}', ano_str)
+    if not anos:
+        return None
+    ano_ini = int(anos[0])
+    if len(anos[0]) == 2:
+        ano_ini = 2000 + int(anos[0]) if int(anos[0]) < 50 else 1900 + int(anos[0])
+    return ano_ini
+
+def parse_ano_fim(ano_str):
+    if not ano_str:
+        return None
+    anos = re.findall(r'\d{2,4}', ano_str)
+    if not anos:
+        return None
+    ano_fim = int(anos[-1])
+    if len(anos[-1]) == 2:
+        ano_fim = 2000 + int(anos[-1]) if int(anos[-1]) < 50 else 1900 + int(anos[-1])
+    return ano_fim

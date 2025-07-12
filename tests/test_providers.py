@@ -48,7 +48,7 @@ def test_authomix_provider():
     test_id = "5042ecad-dbcb-92314cc6-2fb6-6b213869-a827"
     
     try:
-        from app_catalogo_cursor import buscar_provedor_generico
+        from app_catalogo import buscar_provedor_generico
         vehicles = buscar_provedor_generico(test_id, authomix_config)
         
         if vehicles:
@@ -102,7 +102,7 @@ def test_sabo_provider():
     test_id = "5042ecad-dbcb-92314cc6-2fb6-6b213869-a827"
     
     try:
-        from app_catalogo_cursor import buscar_provedor_generico
+        from app_catalogo import buscar_provedor_generico
         vehicles = buscar_provedor_generico(test_id, sabo_config)
         
         if vehicles:
@@ -138,7 +138,7 @@ def test_nakata_provider():
     test_id = "exemplo-123"
     
     try:
-        from app_catalogo_cursor import buscar_provedor_generico
+        from app_catalogo import buscar_provedor_generico
         vehicles = buscar_provedor_generico(test_id, nakata_config)
         
         if vehicles:
@@ -158,7 +158,7 @@ def test_provider_manager():
     print("=" * 50)
     
     try:
-        from app_catalogo_cursor import load_provedores, save_provedores
+        from app_catalogo import load_provedores, save_provedores
         
         # Carrega provedores existentes
         provedores = load_provedores()
@@ -191,7 +191,7 @@ def main():
     print("✅ TESTE CONCLUÍDO!")
     print("=" * 60)
     print("\nPara testar com IDs reais:")
-    print("1. Execute: python app_catalogo_cursor.py")
+    print("1. Execute: python app_catalogo.py")
     print("2. Digite um ID válido de peça")
     print("3. Selecione o provedor desejado")
     print("4. Clique em 'Buscar Aplicações'")

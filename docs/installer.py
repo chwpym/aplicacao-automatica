@@ -7,8 +7,6 @@ Instalador do Sistema de Catálogo de Peças Automotivas
 import os
 import sys
 import subprocess
-import json
-import shutil
 from pathlib import Path
 
 def print_banner():

@@ -326,3 +326,4 @@ def parse_ano_fim(ano_str):
 # Sempre que um novo provedor REST retornar dados em formato diferente,
 # crie um parser específico (ex: parse_nomeprovdor_json ou parse_nomeprovdor_html).
 # Se o formato for igual ao padrão, use os parsers genéricos.
+ 

@@ -6,7 +6,7 @@ Testa o parser HTML e a extração de dados da tabela de aplicações
 """
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import json
 import re
 
@@ -58,7 +58,7 @@ def test_nakata_parser():
         
         # Testa o parser Nakata
         print("\n🚗 Testando parser Nakata...")
-        from app_catalogo_cursor import parse_nakata_html
+        from app_catalogo import parse_nakata_html
         
         vehicles = parse_nakata_html(soup)
         
@@ -84,8 +84,11 @@ def test_nakata_parser():
             tables = soup.find_all('table')
             print(f"\n🔍 Tabelas encontradas: {len(tables)}")
             for i, table in enumerate(tables):
-                headers = [th.get_text(strip=True) for th in table.find_all('th')]
-                print(f"   Tabela {i+1}: {headers}")
+                if isinstance(table, Tag):
+                    headers = [th.get_text(strip=True) for th in table.find_all('th')]
+                    print(f"   Tabela {i+1}: {headers}")
+                else:
+                    print(f"   Tabela {i+1}: [NÃO É TAG]")
         
         # Salva o HTML para debug se necessário
         with open("nakata_debug.html", "w", encoding="utf-8") as f:
@@ -107,7 +110,7 @@ def test_nakata_integration():
     print("="*60)
     
     try:
-        from app_catalogo_cursor import buscar_provedor_generico, load_provedores
+        from app_catalogo import buscar_provedor_generico, load_provedores
         
         # Carrega configuração dos provedores
         provedores = load_provedores()

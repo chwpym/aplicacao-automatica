@@ -168,25 +168,18 @@ query GetProductById($id: String!, $market: MarketType! ) {
                 note = vehicle.get('note', '')
                 only = vehicle.get('only', '')
                 restriction = vehicle.get('restriction', '')
-                ano_str = ""
-                if start_year and end_year:
-                    if str(start_year) == str(end_year):
-                        ano_str = str(start_year)
-                    else:
-                        ano_str = f"{start_year}...{end_year}"
-                elif start_year:
-                    ano_str = f"{start_year}..."
-                elif end_year:
-                    ano_str = f"...{end_year}"
                 field_values = {
-                    'marca': brand,
-                    'modelo': name if name else model,
-                    'motor': engine_name if engine_name else engine_config,
-                    'ano': ano_str,
-                    'observacao': note,
-                    'sistema_freio': brake_system,
-                    'restricao': restriction,
-                    'apenas': only
+                    'brand': brand,
+                    'name': name,
+                    'model': model,
+                    'engineName': engine_name,
+                    'engineConfiguration': engine_config,
+                    'brakeSystem': brake_system,
+                    'startYear': start_year,
+                    'endYear': end_year,
+                    'note': note,
+                    'only': only,
+                    'restriction': restriction
                 }
                 aplicacoes_formatadas.append(field_values)
             print("[DEBUG] Resultado final retornado:", aplicacoes_formatadas)
