@@ -42,53 +42,45 @@ Sistema desktop em Python para consulta de catálogos automotivos, integrando m�
 - Para PDFs locais, selecione os arquivos desejados na lista.
 - O sistema faz backup automático dos arquivos de configuração ao fechar.
 
+## Como ativar/desativar provedores (exemplo: Iguaçu)
+
+Os provedores disponíveis no sistema são configurados no arquivo `provedores.json` na raiz do projeto. Para ativar ou desativar um provedor (por exemplo, o Iguaçu) na interface gráfica:
+
+1. Abra o arquivo `provedores.json` em um editor de texto.
+2. Localize o bloco do provedor desejado. Exemplo para o Iguaçu:
+
+```json
+"iguacu": {
+    "nome": "Iguaçu",
+    "tipo": "iguacu",
+    "ativo": true
+}
+```
+
+3. Para **ativar** o provedor, defina `"ativo": true`.
+4. Para **desativar** o provedor, defina `"ativo": false`.
+5. Salve o arquivo e reinicie a aplicação para que a alteração tenha efeito.
+
+> **Observação:** Apenas provedores com `"ativo": true` aparecem na lista de seleção da interface.
+
+## Como ativar/desativar provedores (exemplo: MTE Thomson)
+
+O provedor MTE Thomson também pode ser ativado ou desativado no arquivo `provedores.json`:
+
+```json
+"mte_thomson": {
+    "nome": "MTE",
+    "tipo": "mte_thomson",
+    "ativo": true
+}
+```
+
+- Para **ativar** o provedor, defina `"ativo": true`.
+- Para **desativar** o provedor, defina `"ativo": false`.
+- Salve o arquivo e reinicie a aplicação para que a alteração tenha efeito.
+
+> **Observação:** O provedor MTE Thomson permite buscar aplicações diretamente do catálogo online da MTE. Apenas provedores com `"ativo": true` aparecem na lista de seleção da interface.
+
 ## Estrutura do Projeto
 
 ```
-aplicacao-automatica/
-│
-├── src/
-│   └── app_catalogo.py         # Arquivo principal da aplicação
-│
-├── providers/                  # Módulos dos provedores (REST, GraphQL, PDF, etc.)
-│   ├── rest.py
-│   ├── graphql.py
-│   ├── generic_provider.py
-│   ├── ...
-│
-├── interface/                  # Componentes da interface gráfica (Tkinter)
-│   ├── main_window.py
-│   ├── results_table.py
-│   ├── search_bar.py
-│   └── layout_system.py
-│
-├── utils/                      # Utilitários e funções auxiliares
-│   ├── config.py
-│   ├── backup.py
-│   └── limpeza.py
-│
-├── backups/                    # Backups automáticos dos arquivos de configuração
-│
-├── docs/                       # Documentação e scripts auxiliares
-│
-├── tests/                      # Testes automatizados
-│   ├── test_nakata.py
-│   ├── test_providers.py
-│   └── ...
-│
-├── catalogos_pdf/              # Catálogos PDF locais para busca
-│
-├── palavras_remover.json       # Lista de palavras/frases para limpeza
-├── provedores.json             # Configuração dos provedores
-├── siglas.json                 # Mapa de siglas
-├── requirements.txt            # Dependências do projeto
-└── README.md                   # Este arquivo
-```
-
-## Contribuição
-
-Pull requests são bem-vindos! Para grandes mudanças, abra uma issue antes para discutir o que você gostaria de modificar.
-
-## Licença
-
-[MIT](LICENSE) 

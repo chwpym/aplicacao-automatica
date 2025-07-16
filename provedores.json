@@ -118,5 +118,37 @@
             "referer": "https://spicer.catalogofraga.com.br/"
         },
         "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
+    },
+    "iguacu": {
+        "nome": "Iguaçu",
+        "tipo": "iguacu",
+        "ativo": true
+    },
+    "delphi": {
+        "nome": "DELPHI",
+        "url": "https://bff.catalogofraga.com.br/gateway/graphql",
+        "tipo": "graphql",
+        "ativo": true,
+        "headers": {
+            "origin": "https://delphi.catalogofraga.com.br",
+            "referer": "https://delphi.catalogofraga.com.br/"
+        },
+        "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
+    },
+    "mte_thomson": {
+        "nome": "MTE",
+        "tipo": "mte_thomson",
+        "ativo": true
+    },
+    "zf_trw_sachs": {
+        "nome": "ZF TRW SACHS",
+        "url": "https://bff.catalogofraga.com.br/gateway/graphql",
+        "tipo": "graphql",
+        "ativo": true,
+        "headers": {
+            "origin": "https://catalogozf.com.br",
+            "referer": "https://catalogozf.com.br/"
+        },
+        "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
     }
 }

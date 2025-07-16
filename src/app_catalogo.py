@@ -41,6 +41,8 @@ from providers.pdf import PDFProvider
 #from providers.graphql import AuthomixGraphQLProvider
 from providers import GenericGraphQLProvider
 from providers.viemar import buscar_viemar_playwright
+from providers.iguacu import IguacuProvider
+from providers.mte_thomson import MteThomsonProvider
 
 # --- Configuração do arquivo de siglas ---
 SIGLAS_FILE = "siglas.json"
@@ -369,6 +371,13 @@ class ProvedorManager(tk.Toplevel):
         self.create_widgets()
         self.populate_tree()
 
+    def treeview_sort_column(self, col, reverse):
+        data = [(self.tree.set(k, col), k) for k in self.tree.get_children('')]
+        data.sort(reverse=reverse)
+        for index, (val, k) in enumerate(data):
+            self.tree.move(k, '', index)
+        self.tree.heading(col, command=lambda: self.treeview_sort_column(col, not reverse))
+
     def create_widgets(self):
         # Menu de ajuda
         menubar = tk.Menu(self)
@@ -458,10 +467,8 @@ class ProvedorManager(tk.Toplevel):
 
         # Treeview
         self.tree = ttk.Treeview(self, columns=("Nome", "URL", "Tipo", "Ativo"), show="headings")
-        self.tree.heading("Nome", text="Nome")
-        self.tree.heading("URL", text="URL")
-        self.tree.heading("Tipo", text="Tipo")
-        self.tree.heading("Ativo", text="Ativo")
+        for col in ("Nome", "URL", "Tipo", "Ativo"):
+            self.tree.heading(col, text=col, command=lambda _col=col: self.treeview_sort_column(_col, False))
         self.tree.column("Nome", width=150)
         self.tree.column("URL", width=250)
         self.tree.column("Tipo", width=80)
@@ -859,13 +866,14 @@ class Application(ttk.Frame):
         self.root = self.winfo_toplevel()
         self.themed_root = themed_root
         self.root.title("Gerenciador de Aplicações de Peças")
-        window_width = 800
-        window_height = 650
+        window_width = 1100
+        window_height = 720
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         center_x = int(screen_width/2 - window_width/2)
         center_y = int(screen_height/2 - window_height/2)
         self.root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
+        self.root.resizable(True, True)  # Torna responsiva!
         self.pack(fill="both", expand=True)
         self.siglas_map = load_siglas()
         self.create_widgets()
@@ -945,7 +953,8 @@ class Application(ttk.Frame):
         frame_fields.pack(padx=10, pady=5, fill="x")
         self.field_vars = {}
         self.available_fields = {
-            'marca': 'Marca',
+            'marca': 'Montadora',
+            'veiculo': 'Veículo',
             'modelo': 'Modelo',
             'motor': 'Motor',
             'configuracao_motor': 'Configuração Motor',
@@ -958,7 +967,17 @@ class Application(ttk.Frame):
             'lado': 'Lado',
             'direcao': 'Direção'
         }
-        default_checked_fields = ['marca', 'modelo', 'motor', 'ano']
+        # Ordem padrão dos campos para a tabela principal
+        self.default_table_fields = [
+            'brand',           # MONTADORA
+            'veiculo',         # VEÍCULO
+            'modelo',          # MODELO
+            'engineName',      # MOTOR
+            'engineConfiguration', # CONFIG. MOTOR
+            'startYear',       # INÍCIO
+            'endYear'          # FIM
+        ]
+        default_checked_fields = ['marca', 'veiculo','modelo', 'motor','configuracao_motor', 'ano']
         
         # Checkbox "Selecionar Tudo"
         self.select_all_var = tk.BooleanVar()
@@ -984,6 +1003,20 @@ class Application(ttk.Frame):
         frame_results.pack(padx=10, pady=5, fill="both", expand=True)
         self.tree_results = ttk.Treeview(frame_results, show="headings")
         self.tree_results.pack(fill="both", expand=True)
+        # Configura as colunas da tabela igual ao exemplo
+        display_names = [
+            'MONTADORA',
+            'VEÍCULO',
+            'MODELO',
+            'MOTOR',
+            'CONFIG. MOTOR',
+            'INÍCIO',
+            'FIM'
+        ]
+        self.tree_results.config(columns=self.default_table_fields)
+        for col_key, display_name in zip(self.default_table_fields, display_names):
+            self.tree_results.heading(col_key, text=display_name)
+            self.tree_results.column(col_key, width=120, anchor='w')
         self.formatted_text_for_clipboard = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=1, height=1)
 
         # Label para mostrar o tema atual
@@ -1098,11 +1131,15 @@ class Application(ttk.Frame):
             except Exception as e:
                 messagebox.showerror("Erro Schadek", f"Erro ao buscar na Schadek: {e}")
                 return
+        elif provedor.get('tipo') == 'iguacu':
+            raw_vehicles = IguacuProvider.buscar_produto(id_peca)
+        elif provedor.get('tipo') == 'mte_thomson':        
+            raw_vehicles = MteThomsonProvider.buscar_produto(id_peca)
         else:
             raw_vehicles = buscar_provedor_generico(id_peca, provedor)
-            if not raw_vehicles:
-                messagebox.showinfo("Sem Aplicações", "Nenhuma aplicação encontrada ou erro na busca.")
-                return
+        if not raw_vehicles:
+            messagebox.showinfo("Sem Aplicações", "Nenhuma aplicação encontrada ou erro na busca.")
+            return
 
         # Limpa a Treeview antes de uma nova busca
         for item in self.tree_results.get_children():
@@ -1113,7 +1150,9 @@ class Application(ttk.Frame):
 
         grouped_applications_by_base = {}
         for vehicle in raw_vehicles:
+            #print("DEBUG vehicle:", vehicle)  # <-- Adicione esta linha!
             brand = vehicle.get('brand', '')
+            #print(f"brand={brand} | veiculo={vehicle.get('veiculo', '')} | modelo={vehicle.get('modelo', '')}")
             name = vehicle.get('name', '')
             model = vehicle.get('model', '')
             engine_name = vehicle.get('engineName', '')
@@ -1125,6 +1164,7 @@ class Application(ttk.Frame):
             only = vehicle.get('only', '')
             restriction = vehicle.get('restriction', '')
 
+           
             display_brand = self.siglas_map.get(brand.upper(), brand)
             display_model = name if name else model
             display_motor = engine_name
@@ -1165,8 +1205,10 @@ class Application(ttk.Frame):
             combined_observations = "; ".join(sorted(list(data['observations'])))
             original_sample = data['original_data_sample']
             full_field_values = {
-                'marca': display_brand,
-                'modelo': display_model,
+                'brand': display_brand,
+                'marca': display_brand,  # <-- Adicione esta linha!
+                'veiculo': original_sample.get('veiculo', original_sample.get('name', display_model)),
+                'modelo': original_sample.get('modelo', original_sample.get('model', display_model)),
                 'motor': display_motor,
                 'configuracao_motor': display_config_motor,
                 'ano': ano_str,
@@ -1265,7 +1307,7 @@ class Application(ttk.Frame):
         self.tree_results.config(columns=[]) # Limpa as colunas
         self.formatted_text_for_clipboard.delete(1.0, tk.END) # Limpa o texto interno
         
-        default_checked_fields = ['marca', 'modelo', 'motor', 'ano']
+        default_checked_fields = ['marca', 'veiculo', 'modelo', 'motor', 'configuracao_motor', 'ano']
         for key, var in self.field_vars.items():
             if key in default_checked_fields:
                 var.set(True)
@@ -1355,7 +1397,7 @@ class Application(ttk.Frame):
 
     def update_provedor_combo(self):
         provedores = load_provedores()
-        ativos = [p['nome'] for p in provedores.values() if p.get('ativo', False)]
+        ativos = sorted([p['nome'].upper() for p in provedores.values() if p.get('ativo', False)], key=str.lower)
         self.provedor_combo['values'] = ativos
         if ativos:
             self.provedor_var.set(ativos[0])
