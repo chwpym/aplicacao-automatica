@@ -1,9 +1,19 @@
 # Funções de configuração serão movidas para cá 
 
+import sys
 import os
 import json
 import re
 from tkinter import messagebox
+
+def resource_path(relative_path):
+    base_path = getattr(sys, '_MEIPASS', os.path.abspath("."))
+    return os.path.join(base_path, relative_path)
+
+# Exemplo de uso:
+provedores_path = resource_path("provedores.json")
+siglas_path = resource_path("siglas.json")
+palavras_remover_path = resource_path("palavras_remover.json")
 
 # --- Utilitários de configuração e dados ---
 def load_siglas(SIGLAS_FILE="siglas.json"):

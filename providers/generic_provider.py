@@ -73,6 +73,9 @@ def buscar_provedor_generico(id_peca, provedor_config):
                 provedor_nome = provedor_config.get('nome', '').lower()
                 if 'nakata' in provedor_nome:
                     return parse_nakata_html(soup)
+                elif 'ds' in provedor_nome:
+                    from providers.ds_parse import parse_ds_html
+                    return parse_ds_html(response)
                 else:
                     return parse_generic_html(soup)
         # NOVO: Suporte para PDF Local

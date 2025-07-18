@@ -43,6 +43,7 @@ from providers import GenericGraphQLProvider
 from providers.viemar import buscar_viemar_playwright
 from providers.iguacu import IguacuProvider
 from providers.mte_thomson import MteThomsonProvider
+from providers.ds_parse import parse_ds_html
 
 # --- Configuração do arquivo de siglas ---
 SIGLAS_FILE = "siglas.json"
@@ -408,7 +409,7 @@ class ProvedorManager(tk.Toplevel):
         # Tipo de API
         ttk.Label(input_frame, text="Tipo:").grid(row=2, column=0, sticky="w", pady=2)
         self.tipo_var = tk.StringVar(value="graphql")
-        tipo_combo = ttk.Combobox(input_frame, textvariable=self.tipo_var, values=["graphql", "rest", "soap", "local"], state="readonly")
+        tipo_combo = ttk.Combobox(input_frame, textvariable=self.tipo_var, values=["graphql", "rest", "soap", "local", "ds", "iguacu", "mte_thomson"], state="readonly")
         tipo_combo.grid(row=2, column=1, sticky="ew", padx=5, pady=2)
         tipo_combo.bind("<<ComboboxSelected>>", self.on_tipo_change)
 
@@ -1118,7 +1119,7 @@ class Application(ttk.Frame):
             raw_vehicles = buscar_viemar_playwright(id_peca)
             #raw_vehicles = parse_viemar_json(id_peca)
         elif provedor.get('tipo') == 'schadek':
-            import requests
+            #import requests
             if hasattr(self, 'schadek_use_products_var') and self.schadek_use_products_var.get():
                 url = provedor.get('url_products', '').replace('{codigo}', id_peca)
             else:
@@ -1135,6 +1136,17 @@ class Application(ttk.Frame):
             raw_vehicles = IguacuProvider.buscar_produto(id_peca)
         elif provedor.get('tipo') == 'mte_thomson':        
             raw_vehicles = MteThomsonProvider.buscar_produto(id_peca)
+        elif provedor.get('tipo') == 'ds':
+            url = provedor.get('url', '').replace('{id}', id_peca)
+            headers = provedor.get('headers', {})
+            try:
+                resp = requests.get(url, headers=headers, timeout=10)
+                resp.raise_for_status()
+                html = resp.text
+                raw_vehicles = parse_ds_html(html)
+            except Exception as e:
+                messagebox.showerror("Erro DS", f"Erro ao buscar na DS: {e}")
+                return
         else:
             raw_vehicles = buscar_provedor_generico(id_peca, provedor)
         if not raw_vehicles:

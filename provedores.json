@@ -150,5 +150,13 @@
             "referer": "https://catalogozf.com.br/"
         },
         "query": "query GetProductById($id: String!, $market: MarketType!) {\n  product(id: $id, market: $market) {\n    vehicles {\n      brand\n      name\n      model\n      engineName\n      engineConfiguration\n      endYear\n      note\n      only\n      restriction\n      startYear\n      __typename\n    }\n  }\n}"
+    },
+    "ds": {
+        "nome": "DS",
+        "url": "https://www.ds.ind.br/pt/produtos/kit-de-filtros-para-bico-injetor/{id}",
+        "tipo": "ds",
+        "ativo": true,
+        "headers": {},
+        "query": ""
     }
 }
