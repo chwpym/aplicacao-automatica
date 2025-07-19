@@ -44,6 +44,7 @@ from providers.viemar import buscar_viemar_playwright
 from providers.iguacu import IguacuProvider
 from providers.mte_thomson import MteThomsonProvider
 from providers.ds_parse import parse_ds_html
+#from multi_provider.aggregator import buscar_em_varios_provedores
 
 # --- Configuração do arquivo de siglas ---
 SIGLAS_FILE = "siglas.json"
@@ -891,6 +892,7 @@ class Application(ttk.Frame):
         menu_acao.add_command(label="Gerenciar Siglas", command=self.open_sigla_manager)
         menu_acao.add_command(label="Gerenciar Palavras para Remover", command=self.open_palavras_remover_manager)
         menu_acao.add_command(label="Gerenciar Provedores", command=self.open_provedor_manager)
+        menu_acao.add_command(label="Multi-Provedores (Popup)", command=self.abrir_multi_provedores)
         menu_acao.add_separator()
         menu_acao.add_command(label="🔍 Testar Provedores Locais", command=self.test_provedores_locais)
         menu_acao.add_command(label="📚 Abrir Guia de Ajuda", command=self.abrir_guia_ajuda)
@@ -1416,6 +1418,13 @@ class Application(ttk.Frame):
 
     def open_provedor_manager(self):
         ProvedorManager(self, self.reload_provedores)
+    
+    def abrir_multi_provedores(self):
+        from src.app_multi_provider import MultiProviderTestApp
+        popup = MultiProviderTestApp(self)
+        popup.title("Busca Multi-Provedores")
+        popup.grab_set()  # Modal: bloqueia interação com a principal até fechar
+        popup.transient(self.root)  # Mantém o popup acima da principal
 
     def reload_provedores(self):
         self.update_provedor_combo()

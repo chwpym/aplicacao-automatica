@@ -107,3 +107,7 @@ def parse_ano_fim(ano_str):
     if len(anos[-1]) == 2:
         ano_fim = 2000 + int(anos[-1]) if int(anos[-1]) < 50 else 1900 + int(anos[-1])
     return ano_fim
+
+def exibir_ano(ano):
+    """Exibe 'EM DIANTE' se ano for 9999, senão retorna o ano como string."""
+    return "EM DIANTE" if str(ano) == "9999" else str(ano)
