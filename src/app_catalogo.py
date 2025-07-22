@@ -26,7 +26,8 @@ from providers.rest_parsers import (
     parse_viemar_json,
     parse_generic_json,
     parse_generic_html,
-    parse_schadek_json
+    parse_schadek_json,
+    parse_tubacabos_json
 )
 from providers.rest_html_generic import parse_generic_rest_html
 from utils.config import (

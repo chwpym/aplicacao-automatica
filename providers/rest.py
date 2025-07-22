@@ -84,15 +84,17 @@ def buscar_provedor_generico(id_peca, provedor_config):
                 return []
             from providers.rest_parsers import (
                 parse_viemar_json, parse_wega_json, parse_generic_json, parse_schadek_json,
-                parse_nakata_html, parse_generic_html
+                parse_nakata_html, parse_generic_html, parse_tubacabos_json
             )
             if isinstance(response, dict):
                 if 'viemar' in provedor_config.get('nome', '').lower() or 'viemar' in provedor_config.get('url', '').lower():
                     return parse_viemar_json(response)
-                if 'wega' in provedor_config.get('nome', '').lower() or 'wega' in provedor_config.get('url', '').lower():
+                elif 'wega' in provedor_config.get('nome', '').lower() or 'wega' in provedor_config.get('url', '').lower():
                     return parse_wega_json(response)
-                if 'schadek' in provedor_config.get('nome', '').lower() or 'schadek' in provedor_config.get('url', '').lower():
+                elif 'schadek' in provedor_config.get('nome', '').lower() or 'schadek' in provedor_config.get('url', '').lower():
                     return parse_schadek_json(response)
+                elif 'tubacabos' in provedor_config.get('nome', '').lower() or 'tubacabos' in provedor_config.get('url', '').lower():
+                    return parse_tubacabos_json(response)
                 else:
                     return parse_generic_json(response)
             else:

@@ -5,7 +5,7 @@ from tkinter import messagebox
 import requests
 import json
 from providers.rest_parsers import (
-    parse_viemar_json, parse_wega_json, parse_generic_json, parse_nakata_html, parse_generic_html
+    parse_viemar_json, parse_wega_json, parse_generic_json, parse_nakata_html, parse_generic_html, parse_tubacabos_json
 )
 
 def buscar_provedor_generico(id_peca, provedor_config):
@@ -54,12 +54,14 @@ def buscar_provedor_generico(id_peca, provedor_config):
                 messagebox.showerror("Erro de Conexão", f"Erro ao acessar a API do provedor: {e}")
                 return []
             # --- Parsing da resposta REST ---
-            # Se for JSON (ex: Wega, Viemar)
+            # Se for JSON (ex: Wega, Viemar, TubaCabos)
             if isinstance(response, dict):
                 if 'viemar' in provedor_config.get('nome', '').lower() or 'viemar' in provedor_config.get('url', '').lower():
                     return parse_viemar_json(response)
-                if 'wega' in provedor_config.get('nome', '').lower() or 'wega' in provedor_config.get('url', '').lower():
+                elif 'wega' in provedor_config.get('nome', '').lower() or 'wega' in provedor_config.get('url', '').lower():
                     return parse_wega_json(response)
+                elif 'tubacabos' in provedor_config.get('nome', '').lower() or 'tubacabos' in provedor_config.get('url', '').lower():
+                    return parse_tubacabos_json(response)
                 else:
                     return parse_generic_json(response)
             # Se for HTML (ex: Nakata ou outros)
