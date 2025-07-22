@@ -1139,6 +1139,17 @@ class Application(ttk.Frame):
             raw_vehicles = IguacuProvider.buscar_produto(id_peca)
         elif provedor.get('tipo') == 'mte_thomson':        
             raw_vehicles = MteThomsonProvider.buscar_produto(id_peca)
+        elif provedor.get('nome', '').lower() == 'tubacabos' or 'tubacabos' in provedor.get('url', '').lower():
+            url = provedor.get('url', '').replace('{id}', id_peca)
+            headers = provedor.get('headers', {})
+            try:
+                resp = requests.get(url, headers=headers, timeout=10)
+                resp.raise_for_status()
+                data = resp.json()
+                raw_vehicles = parse_tubacabos_json(data)
+            except Exception as e:
+                messagebox.showerror("Erro TubaCabos", f"Erro ao buscar na TubaCabos: {e}")
+                return
         elif provedor.get('tipo') == 'ds':
             url = provedor.get('url', '').replace('{id}', id_peca)
             headers = provedor.get('headers', {})
