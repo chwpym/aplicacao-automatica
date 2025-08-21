@@ -45,6 +45,7 @@ from providers.iguacu import IguacuProvider
 from providers.mte_thomson import MteThomsonProvider
 from providers.ds_parse import parse_ds_html
 #from multi_provider.aggregator import buscar_em_varios_provedores
+from providers.ate import ATEProvider
 
 # --- Configuração do arquivo de siglas ---
 SIGLAS_FILE = "siglas.json"
@@ -1149,6 +1150,25 @@ class Application(ttk.Frame):
             except Exception as e:
                 messagebox.showerror("Erro DS", f"Erro ao buscar na DS: {e}")
                 return
+        elif provedor.get('tipo') == 'ate':
+            url = provedor.get('url', '').replace('{cw_filtros}', f'PCs<!2!>{id_peca}') \
+                                 .replace('{cw_ie_tp}', '0') \
+                                 .replace('{cw_produtoAtivo}', f'CodigoProduto<!2!>{id_peca}')
+            headers = provedor.get('headers', {})
+            print('URL:', url)
+            try:
+                resp = requests.get(url, headers=headers, timeout=10)
+                print('STATUS:', resp.status_code)
+                resp.raise_for_status()
+                html = resp.text
+                with open('debug_ate.html', 'w', encoding='utf-8') as f:
+                    f.write(html)
+                print('HTML LEN:', len(html))
+                raw_vehicles = ATEProvider.buscar_produto(html)
+                print('RAW VEHICLES:', raw_vehicles)
+            except Exception as e:
+                print('ERRO ATE:', e)
+                raw_vehicles = []
         else:
             raw_vehicles = buscar_provedor_generico(id_peca, provedor)
         if not raw_vehicles:
